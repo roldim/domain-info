@@ -1,0 +1,50 @@
+#!/bin/bash
+# Author: Ander
+# Get info about a domain
+# Check if the required packets are installed
+
+ERROR=0
+PUB_DNS=(8.8.8.8 208.67.222.222 64.6.64.6 8.26.56.26)
+
+. funcs/checking
+. funcs/help
+
+# Show help text and exit when wrong number of arguments or hyphens are introduced
+[[ $# -ne 1 ]] || [[ `echo $1 | grep -c "-"` -gt 0 ]] && help && exit 1
+
+help
+for I in curl dig whois; do
+  echo Checking if $I exists...  `checking $I` | sed 's/dig/bind-tools/g' # 'Cause bind-tools provides the dig command
+  ERROR=$((`checking $I | grep -c "OK"`+$ERROR))
+done
+
+if [[ $ERROR -lt 3 ]]; then
+  echo "Please, install the required packages"
+  exit 2
+fi
+
+echo "Checking if $1 is reachable..."
+ERR_CODE=`curl -o /dev/null -Is --write-out '%{http_code}\n' $1`   # `curl -m 4 $1 &>/dev/null ; echo $?`
+if [[ $ERR_CODE -lt 200 ]] && [[ $ERR_CODE -gt 306 ]]; then
+  echo The URL is unreachable. Exiting...
+  exit 3
+else
+  echo OK
+fi
+
+echo -e "\n --- HTTP header info ---\n"
+
+curl -ILks $1 | grep -A 20 "HTTP/1.1 200 OK"
+geoiplookup $1
+read -p "Press enter to see the DNS resolution. "
+echo -e "\n --- DNS resolution info ---\n"
+
+for I in ${PUB_DNS[@]}; do
+  echo -e "\n -- Server: $I --\n"
+  dig $1 @$I | grep -ie ^$1 -e answer -e authority
+done
+
+echo
+read -p "Press enter to see the WHOIS info. "
+echo -e "\n --- WHOIS info ---\n"
+whois $1

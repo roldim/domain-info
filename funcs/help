@@ -1,0 +1,15 @@
+#!/bin/bash
+# Author: Ander
+# Get info about a domain
+# Check if the required packets are installed
+
+help() {
+  echo "
+  This script shows the HTTP header, the A record with 4 different
+  servers and the WHOIS info about the domain.
+
+  Usage: ./domain-info <domain>
+  Example:
+     domain-info google.com
+  "
+}

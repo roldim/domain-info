@@ -1,0 +1,12 @@
+#!/bin/bash
+# Author: Ander
+# Get info about a domain
+# Check if the required packets are installed
+
+checking() {
+  if [[ `which $1 &>/dev/null; echo $?` -eq 0 ]]; then
+    echo OK
+  else
+    echo $1 is not installed, please install it!
+  fi
+}
