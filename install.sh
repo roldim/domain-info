@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#
 [[ $EUID -ne 0 ]] && echo "Please, run as root" && exit 1
 INST_DIR=/usr/local/
 
